@@ -94,7 +94,7 @@ app.all('*', function(req, res, next) {
                     archiveRes.on('end', () => res.end());
                     archiveRes.on('close', () => res.end());
                 }
-            }).on('error', res.send);
+            }).on('error', e => res.send(e));
         };
         serve(archiveUrl);
     }
