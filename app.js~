@@ -1,0 +1,64 @@
+
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const url = require('url');
+const http = require('http');
+
+const app = express();
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.all('/', function(req, res, next) {
+    const requestUrl = url.parse(req.url);
+    const url = 'http://web.archive.org/web/2000id_/' + requestUrl.href;
+    const serve = proxyUrl => {
+        http.get(proxyUrl, (res) => {
+            const { statusCode } = res;
+            if (statusCode === 302 ) {
+                proxyServe(url.parse(res.headers['location']));
+            }
+            else {
+                const data = [];
+                res.on('data', (chunk) => {
+                    data.push(chunk);
+                });
+                res.on('end', () => {
+                    const buffer = Buffer.concat(data);
+                    response.writeHead(200, {
+                        'Content-Type': contentType,
+                    });
+                    response.end(buffer, 'binary');
+                });
+            }
+        }).on('error', res.send(e));
+    };
+    serve(url);
+});
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+module.exports = app;
