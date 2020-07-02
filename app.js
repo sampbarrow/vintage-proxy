@@ -9,7 +9,7 @@ const http = require('http');
 const mime = require('mime-types');
 const vhost = require('vhost');
 const fs = require('fs');
-const minimatch = require("minimatch")
+const minimatch = require("minimatch");
 
 const app = express();
 
@@ -81,7 +81,7 @@ app.all('*', function(req, res, next) {
             }
         })();
         const parsed = url.parse(req.originalUrl);
-        const date = Object.entries(sites).filter(site => site[0]).map(site => site[1]) || 2000;
+        const date = Object.entries(sites).filter(site => site[0]).sort((a, b) => a[0].length < b[0].length).filter(site => minimatch(parsed.host, site[0])).map(site => site[1])[0] || 2000;
         const archiveUrl = 'http://web.archive.org/web/' + date + 'id_/' + parsed.href;
         const serve = proxyUrl => {
             http.get(proxyUrl, archiveRes => {
