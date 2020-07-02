@@ -17,11 +17,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const router = express.Router();
 router.use(express.static('public'));
-router.use(express.json());
-router.use(express.urlencoded({ extended: true }));
 router.get('/', function (req, res, next) {
     try {
         const sites = (function() {
