@@ -62,7 +62,7 @@ router.post('/', function (req, res, next) {
     }
 });
 
-app.use(vhost('vintage-proxy', router));
+app.use(vhost('vintage-proxy.local', router));
 
 app.all('*', function(req, res, next) {
     try {
@@ -81,6 +81,7 @@ app.all('*', function(req, res, next) {
                 return [];
             }
         })();
+        //TODO exclusions
         const parsed = url.parse(req.originalUrl);
         const date = Object.entries(sites).filter(site => site[0]).sort((a, b) => a[0].length < b[0].length).filter(site => minimatch(parsed.host, site[0])).map(site => site[1])[0] || 2000;
         const excluded = exclude.filter(pattern => minimatch(parsed.host, pattern)).length > 0;
