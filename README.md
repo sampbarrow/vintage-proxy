@@ -12,5 +12,4 @@ Note that this does not handle SSL, the assumption being that this is being used
 
 This also lets you use glob patterns to customize the default date you want to pull from Wayback Machine on a site by site basis. By default, it uses the year 2000.
 
-You can access the configuration page at http://vintage-proxy/ (obviously you have to be using the proxy to access this). See screenshot.png in the repo.
-
+You can access the configuration page at http://vintage-proxy.local/ (obviously you have to be using the proxy to access this). See screenshot.png in the repo.
