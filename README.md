@@ -2,7 +2,9 @@
 
 This is a proxy written using Express that lets you browse the Wayback Machine as if you were browsing the internet.
 
-Simply run using "npm start" and set your proxy settings in your browser to use the hostname that Vintage Proxy is running on, and port 3000 (this is the default port that Express runs on).
+Simply download dependencies using "npm install" in the project's root directory, then run using "npm start". To use it, set your proxy settings in your browser to use the hostname that Vintage Proxy is running on, and port 3000 (this is the default port that Express runs on).
+
+To choose your own port, run "PORT=XXXX npm start" instead of just "npm start".
 
 This is intended to work with vintage browsers that can not access current web sites.
 
