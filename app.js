@@ -83,10 +83,10 @@ app.all('*', function(req, res, next) {
         })();
         //TODO exclusions
         const parsed = url.parse(req.originalUrl);
-        const date = Object.entries(sites).filter(site => site[0]).sort((a, b) => a[0].length < b[0].length).filter(site => minimatch(parsed.host, site[0])).map(site => site[1])[0] || 2000;
-        const excluded = exclude.filter(pattern => minimatch(parsed.host, pattern)).length > 0;
-        console.log("Received request for " + req.originalUrl + " (Excluded: " + (excluded ? "Yes" : "No") + ").");
-        const archiveUrl = 'http://web.archive.org/web/' + date + 'id_/' + parsed.href;
+        //const date = Object.entries(sites).filter(site => site[0]).sort((a, b) => a[0].length < b[0].length).filter(site => minimatch(parsed.host, site[0])).map(site => site[1])[0] || req.socket.localPort;
+        //const excluded = exclude.filter(pattern => minimatch(parsed.host, pattern)).length > 0;
+        //console.log("Received request for " + req.originalUrl + " (Excluded: " + (excluded ? "Yes" : "No") + ").");
+        const archiveUrl = 'http://web.archive.org/web/' + req.socket.localPort + 'id_/' + parsed.href;
         const serve = proxyUrl => {
             http.get(proxyUrl, archiveRes => {
                 if (archiveRes.statusCode === 404) {
