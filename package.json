@@ -6,11 +6,15 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "bottleneck": "^2.19.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "http": "0.0.1-security",
     "http-errors": "~1.6.3",
+    "jade": "^1.11.0",
+    "lodash": "^4.17.20",
     "morgan": "~1.9.1",
+    "node-fetch": "^2.6.1",
     "url": "^0.11.0"
   }
 }
