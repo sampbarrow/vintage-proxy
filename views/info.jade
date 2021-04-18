@@ -1,0 +1,12 @@
+html
+    head
+        body
+            p
+                strong Address:
+                span  #{url}
+                br
+                strong Date Requested:
+                span  #{availability.timestamp}
+                br
+                strong Date Found:
+                span  #{availability.archived_snapshots.closest.timestamp}
