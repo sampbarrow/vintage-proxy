@@ -8,7 +8,7 @@
   "dependencies": {
     "bottleneck": "^2.19.5",
     "debug": "~2.6.9",
-    "express": "~4.16.1",
+    "express": "~4.18.2",
     "http": "0.0.1-security",
     "http-errors": "~1.6.3",
     "jade": "^1.11.0",
