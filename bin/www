@@ -15,7 +15,7 @@ var http = require('http');
 //var port = normalizePort(process.env.PORT || '3000');
 //app.set('port', port);
 
-for (var port = 1990; port <= 2020; port++) {
+for (var port = 1996; port <= (new Date().getFullYear()); port++) {
   
   /**
    * Create HTTP server.

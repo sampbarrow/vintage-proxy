@@ -6,6 +6,7 @@ const Bottleneck = require('bottleneck');
 const fetch = require('node-fetch');
 
 const app = express();
+app.set("view engine", "jade");
 //app.use(express.urlencoded({ extended: false }));
 
 const limiter = new Bottleneck({
@@ -21,7 +22,6 @@ app.get('*', async function(req, res, next) {
         const originalUrl = parsed.protocol + "//" + parsed.hostname + parsed.pathname + (parsed.query ? "?" + parsed.query : "");
         limiter.schedule(async () => {
             const archive = await fetch("http://web.archive.org/web/" + year + "id_/" + originalUrl);
-            const archiveData = await archive.buffer();
             if (archive.status === 404) {
                 next({
                     status: 404,
@@ -29,6 +29,7 @@ app.get('*', async function(req, res, next) {
                 });
             }
             else {
+                const archiveData = await archive.buffer();
                 const contentType = archive.headers.raw()["content-type"][0];
                 res.writeHead(archive.status, {
                     "content-type": contentType,
