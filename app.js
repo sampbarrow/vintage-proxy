@@ -6,7 +6,9 @@ const Bottleneck = require('bottleneck');
 const fetch = require('node-fetch');
 
 const app = express();
-app.set("view engine", "jade");
+app.set("view engine", "pug");
+app.set('views', __dirname);
+
 //app.use(express.urlencoded({ extended: false }));
 
 const limiter = new Bottleneck({
