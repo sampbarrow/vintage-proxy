@@ -1,9 +1,12 @@
 {
   "name": "proxy",
   "version": "0.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "start": "node run.js"
+    "start": "node run.js",
+    "sls-deploy": "sls deploy",
+    "sls-package": "sls package"
   },
   "dependencies": {
     "bottleneck": "^2.19.5",
@@ -12,7 +15,9 @@
     "http": "0.0.1-security",
     "http-errors": "^2.0.0",
     "morgan": "^1.10.0",
+    "node-fetch": "^3.3.0",
     "pug": "^3.0.2",
+    "serverless-http": "^3.1.0",
     "url": "^0.11.0"
   }
 }

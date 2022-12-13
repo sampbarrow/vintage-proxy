@@ -1,47 +1,82 @@
 
-const createError = require('http-errors');
-const express = require('express');
-const url = require('url');
-const Bottleneck = require('bottleneck');
-const fetch = require('node-fetch');
+import createError from 'http-errors';
+import express from 'express';
+import url from 'url';
+import Bottleneck from 'bottleneck';
+import fetch from 'node-fetch';
 
 const app = express();
 app.set("view engine", "pug");
-app.set('views', __dirname);
+app.set('views', "./");
 
-//app.use(express.urlencoded({ extended: false }));
+function getEnv(key, map, def) {
+    return process.env[key] ? map(process.env[key]) : def;
+}
+
+const minTime = getEnv("MIN_TIME", parseInt, 100);
+const maxConcurrent = getEnv("MAX_CONCURRENT", parseInt, 10);
+const defaultYear = getEnv("DEFAULT_YEAR", parseInt);
+
+console.info("Starting vintage proxy.");
 
 const limiter = new Bottleneck({
-  minTime: 100,
-  maxConcurrent: 10,
+  minTime,
+  maxConcurrent,
 });
 
 app.get('*', async function(req, res, next) {
     try {
         const parsed = url.parse(req.originalUrl);
-        const year = parsed.port || req.socket.localPort;
-        const specifiedYear = parsed.port;
+        if (parsed.protocol === null || parsed.hostname === null) {
+            next({
+                status: 400,
+                statusText: "Bad Request",
+                message: "You have provided an invalid URL (" + req.originalUrl + "). A protocol and hostname are required.",
+            });
+            return;
+        }
+        const requestYear = parsed.port;
+        if (requestYear !== null && (requestYear < 1996 || requestYear > new Date().getFullYear())) {
+            next({
+                status: 400,
+                statusText: "Bad Request",
+                message: "You have specified an invalid port (" + requestYear + ").",
+            });
+            return;
+        }
+        const listeningYear = req.socket.localPort >= 1996 && req.socket.localPort <= new Date().getFullYear() ? req.socket.localPort : undefined;
+        const year = requestYear || listeningYear || defaultYear;
         const originalUrl = parsed.protocol + "//" + parsed.hostname + parsed.pathname + (parsed.query ? "?" + parsed.query : "");
+        console.log("Processing " + year + " request for " + originalUrl + ".");
         limiter.schedule(async () => {
-            const archive = await fetch("http://web.archive.org/web/" + year + "id_/" + originalUrl);
-            if (archive.status === 404) {
-                next({
-                    status: 404,
-                    message: "This URL is not archived.",
-                });
-            }
-            else {
-                const archiveData = await archive.buffer();
+            try {
+                const archive = await fetch("http://web.archive.org/web/" + year + "id_/" + originalUrl);
+                if (archive.status >= 300) {
+                    next({
+                        status: archive.status,
+                        statusText: archive.statusText,
+                        message: "Received a status code of " + archive.status + " from the wayback machine at " + year + " for " + originalUrl + ".",
+                    });
+                    return;
+                }
+                const data = await archive.buffer();
                 const contentType = archive.headers.raw()["content-type"][0];
                 res.writeHead(archive.status, {
                     "content-type": contentType,
                 });
-                if (contentType === "text/html" && specifiedYear) {
-                    res.end(archiveData.toString().replace(/https?:\/\/([a-zA-Z0-9\-\._]+)/g, "http://$1:" + specifiedYear));
+                if (contentType === "text/html" && requestYear) {
+                    res.end(data.toString().replace(/https?:\/\/([a-zA-Z0-9\-\._]+)/g, "http://$1:" + requestYear));
                 }
                 else {
-                    res.end(archiveData);
+                    res.end(data);
                 }
+            }
+            catch (e) {
+                    next({
+                        status: 500,
+                        statusText: "Internal Server Error",
+                        message: e.message,
+                    });
             }
         });
     }
@@ -51,14 +86,20 @@ app.get('*', async function(req, res, next) {
 });
 
 app.use(function(req, res, next) {
-  next(createError(404));
+    next({
+        status: 405,
+        statusText: "Method Not Allowed",
+        message: "This method (" + req.method + ") is not allowed.",
+    });
 });
 
 app.use(function(err, req, res, next) {
-  res.locals.message = err.message;
-  res.locals.error = err;
-  res.status(err.status || 500);
-  res.render('error');
+    console.error(err.message);
+    res.locals.message = err.message;
+    res.locals.error = err;
+    res.status(err.status || 500);
+    res.render('error');
 });
 
-module.exports = app;
+export default app;
+
